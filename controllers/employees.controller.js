@@ -14,10 +14,10 @@ exports.getAllEntrys = async (req, res) => {
 exports.getRandomEntry = async (req, res) => {
   try {
     const count = await Employee.countDocuments();
-    const rand = Math.floor(math.random() * count);
-    const dep = await Employee.findOne().skip(rand);
-    if(!dep) res.status(404).json({ message: 'Not found' })
-    else res.json(dep);
+    const rand = Math.floor(Math.random() * count);
+    const emp = await Employee.findOne().skip(rand);
+    if(!emp) res.status(404).json({ message: 'Not found' })
+    else res.json(emp);
   }
   catch(err) {
     res.status(500).json({ message: err })
@@ -26,9 +26,9 @@ exports.getRandomEntry = async (req, res) => {
 
 exports.getEntryById = async (req, res) => {
   try {
-    const dep = await Employee.findById(req.params.id);
-    if(!dep) res.status(404).json({ message: 'Not found' });
-    else res.json(dep);
+    const emp = await Employee.findById(req.params.id);
+    if(!emp) res.status(404).json({ message: 'Not found' });
+    else res.json(emp);
   }
   catch(err) {
     res.status(500).json({ message: err });
@@ -36,25 +36,28 @@ exports.getEntryById = async (req, res) => {
 };
 
 exports.addNewEntry = async (req, res) => {
-  const { name } = req.body;
+  const { firstName, lastName, department, salary } = req.body;
 
   try {
-    const newEmployee = new Employee({ name: name })
+    const newEmployee = new Employee({ firstName, lastName, department, salary })
     await newEmployee.save();
-    res.json({ message: 'OK' });
+    res.json(await Employee.find());
   } catch(err) {
     res.status(500).json({ message: err });
   }
 };
 
 exports.editEntry = async (req, res) => {
-  const { name } = req.body;
+  const { firstName, lastName, department, salary } = req.body;
 
   try {
-    const dep = await Employee.findById(req.params.id);
-    if(dep){
-      dep.name = name;
-      await dep.save();
+    const emp = await Employee.findById(req.params.id);
+    if(emp){
+      emp.firstName = firstName;
+      emp.lastName = lastName;
+      emp.department = department;
+      emp.salary = salary;
+      await emp.save();
       res.json(await Employee.find());
     } else res.status(404).json({ message: 'Not found' })
   }
@@ -64,12 +67,10 @@ exports.editEntry = async (req, res) => {
 };
 
 exports.deleteEntry = async (req, res) => {
-  const { name } = req.body;
-
   try {
-    const dep = Employee.findById(req.params.id);
-    if(dep){
-      await Employee.deleteOne({ _id: req.params.id }, { $set: { name: name }});
+    const emp = Employee.findById(req.params.id);
+    if(emp){
+      await Employee.deleteOne({ _id: req.params.id });
       res.json(await Employee.find());
     } else res.status(404).json({ message: 'Not found' })
   }

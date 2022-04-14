@@ -14,10 +14,10 @@ exports.getAllEntrys = async (req, res) => {
 exports.getRandomEntry = async (req, res) => {
   try {
     const count = await Product.countDocuments();
-    const rand = Math.floor(math.random() * count);
-    const dep = await Product.findOne().skip(rand);
-    if(!dep) res.status(404).json({ message: 'Not found' })
-    else res.json(dep);
+    const rand = Math.floor(Math.random() * count);
+    const product = await Product.findOne().skip(rand);
+    if(!product) res.status(404).json({ message: 'Not found' })
+    else res.json(product);
   }
   catch(err) {
     res.status(500).json({ message: err });
@@ -26,9 +26,9 @@ exports.getRandomEntry = async (req, res) => {
 
 exports.getEntryById = async (req, res) => {
   try {
-    const dep = await Product.findById(req.params.id);
-    if(!dep) res.status(404).json({ message: 'Not found' });
-    else res.json(dep);
+    const product = await Product.findById(req.params.id);
+    if(!product) res.status(404).json({ message: 'Not found' });
+    else res.json(product);
   }
   catch(err) {
     res.status(500).json({ message: err });
@@ -36,10 +36,10 @@ exports.getEntryById = async (req, res) => {
 };
 
 exports.addNewEntry = async (req, res) => {
-  const { name } = req.body;
+  const { name, client } = req.body;
 
   try {
-    const newProduct = new Product({ name: name })
+    const newProduct = new Product({ name, client })
     await newProduct.save();
     res.json({ message: 'OK' });
   } catch(err) {
@@ -48,13 +48,14 @@ exports.addNewEntry = async (req, res) => {
 };
 
 exports.editEntry = async (req, res) => {
-  const { name } = req.body;
+  const { name, client } = req.body;
 
   try {
-    const dep = await Product.findById(req.params.id);
-    if(dep){
-      dep.name = name;
-      await dep.save();
+    const product = await Product.findById(req.params.id);
+    if(product){
+      product.name = name;
+      product.client = client;
+      await product.save();
       res.json(await Product.find());
     } else res.status(404).json({ message: 'Not found' })
   }
@@ -64,12 +65,10 @@ exports.editEntry = async (req, res) => {
 };
 
 exports.deleteEntry = async (req, res) => {
-  const { name } = req.body;
-
   try {
-    const dep = Product.findById(req.params.id);
-    if(dep){
-      await Product.deleteOne({ _id: req.params.id }, { $set: { name: name }});
+    const product = Product.findById(req.params.id);
+    if(product){
+      await Product.deleteOne({ _id: req.params.id });
       res.json(await Product.find());
     } else res.status(404).json({ message: 'Not found' })
   }

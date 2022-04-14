@@ -64,12 +64,10 @@ exports.editEntry = async (req, res) => {
 };
 
 exports.deleteEntry = async (req, res) => {
-  const { name } = req.body;
-
   try {
     const dep = Department.findById(req.params.id);
     if(dep){
-      await Department.deleteOne({ _id: req.params.id }, { $set: { name: name }});
+      await Department.deleteOne({ _id: req.params.id });
       res.json(await Department.find());
     } else res.status(404).json({ message: 'Not found' })
   }
